@@ -13,11 +13,13 @@ const Navbar = ({
   setShowNotifications,
   markAllAsRead,
   markNotificationAsRead,
+  removeNotification,
   unreadCount
 }) => {
   const location = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleNotificationClick = () => {
     if (isLoggedIn) {
@@ -28,12 +30,22 @@ const Navbar = ({
   const handleAuthClick = (mode) => {
     setAuthMode(mode);
     setShowAuthModal(true);
+    setIsMenuOpen(false);
+    setShowNotifications(false);
   };
 
   const handleLogout = () => {
     logout();
     setShowNotifications(false);
+    setIsMenuOpen(false);
   };
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+    setShowNotifications(false);
+  };
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <>
@@ -44,11 +56,12 @@ const Navbar = ({
             <span>Student Hub</span>
           </div>
 
-          <ul className="nav-menu">
+          <ul className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
             <li>
               <Link
                 to="/"
                 className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                onClick={closeMenu}
               >
                 Home
               </Link>
@@ -57,6 +70,7 @@ const Navbar = ({
               <Link
                 to="/about"
                 className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
+                onClick={closeMenu}
               >
                 About Us
               </Link>
@@ -65,6 +79,7 @@ const Navbar = ({
               <Link
                 to="/events"
                 className={`nav-link ${location.pathname === '/events' ? 'active' : ''}`}
+                onClick={closeMenu}
               >
                 Events & Updates
               </Link>
@@ -73,6 +88,7 @@ const Navbar = ({
               <Link
                 to="/discussion"
                 className={`nav-link ${location.pathname === '/discussion' ? 'active' : ''}`}
+                onClick={closeMenu}
               >
                 Discussion
               </Link>
@@ -118,7 +134,13 @@ const Navbar = ({
               </>
             )}
 
-            <div className="nav-toggle">
+            <div
+              className={`nav-toggle ${isMenuOpen ? 'active' : ''}`}
+              onClick={toggleMenu}
+              role="button"
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMenuOpen}
+            >
               <span className="bar"></span>
               <span className="bar"></span>
               <span className="bar"></span>
@@ -127,39 +149,54 @@ const Navbar = ({
         </div>
       </nav>
 
-      {/* Notifications Dropdown - Only for authenticated users */}
+      {/* Notifications Overlay - Only for authenticated users */}
       {isLoggedIn && showNotifications && (
-        <div className="notification-dropdown">
-          <div className="notification-header">
-            <h4>Notifications</h4>
-            {unreadCount > 0 && (
-              <span className="mark-all-read" onClick={markAllAsRead}>
-                Mark all as read
-              </span>
-            )}
-          </div>
-          <div className="notification-list">
-            {notifications.length === 0 ? (
-              <div className="no-notifications">
-                <i className="fas fa-bell-slash"></i>
-                <p>No notifications yet</p>
+        <div className="notification-overlay" onClick={() => setShowNotifications(false)}>
+          <div className="notification-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="notification-header">
+              <h4>Notifications</h4>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                {unreadCount > 0 && (
+                  <span className="mark-all-read" onClick={markAllAsRead}>
+                    Mark all as read
+                  </span>
+                )}
+                <button className="close-btn" onClick={() => setShowNotifications(false)}>
+                  <i className="fas fa-times"></i>
+                </button>
               </div>
-            ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`notification-item ${notification.type} ${notification.read ? 'read' : ''}`}
-                  onClick={() => markNotificationAsRead(notification.id)}
-                >
-                  <div className="notification-content">
-                    <h5>{notification.title}</h5>
-                    <p>{notification.message}</p>
-                    <span className="notification-time">{notification.time}</span>
-                  </div>
-                  {!notification.read && <div className="unread-dot"></div>}
+            </div>
+            <div className="notification-list">
+              {notifications.length === 0 ? (
+                <div className="no-notifications">
+                  <i className="fas fa-bell-slash"></i>
+                  <p>No notifications yet</p>
                 </div>
-              ))
-            )}
+              ) : (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`notification-item ${notification.type} ${notification.read ? 'read' : ''}`}
+                    onClick={() => markNotificationAsRead(notification.id)}
+                  >
+                    <div className="notification-content">
+                      <h5>{notification.title}</h5>
+                      <p>{notification.message}</p>
+                      <span className="notification-time">{notification.time}</span>
+                    </div>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ marginLeft: '0.5rem' }}
+                      title="Remove notification"
+                      onClick={(e) => { e.stopPropagation(); removeNotification(notification.id); }}
+                    >
+                      <i className="fas fa-check"></i>
+                    </button>
+                    {!notification.read && <div className="unread-dot"></div>}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

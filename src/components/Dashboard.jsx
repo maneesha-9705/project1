@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Dashboard = ({ isLoggedIn }) => {
+const Dashboard = ({ isLoggedIn, view }) => {
   const events = [
     {
       id: 1,
@@ -52,6 +52,28 @@ const Dashboard = ({ isLoggedIn }) => {
     }
   ];
 
+  const [activeTab, setActiveTab] = useState('events');
+  const [query, setQuery] = useState('');
+
+  const matchesQuery = (text) =>
+    text.toLowerCase().includes(query.trim().toLowerCase());
+
+  const filteredEvents = events.filter(
+    (e) => matchesQuery(e.title) || matchesQuery(e.description)
+  );
+
+  const filteredUpdates = updates.filter(
+    (u) => matchesQuery(u.title) || matchesQuery(u.description)
+  );
+
+  const half = (n) => Math.ceil(n / 2);
+  const displayEvents = filteredEvents.slice(0, half(filteredEvents.length));
+  const displayUpdates = filteredUpdates.slice(0, half(filteredUpdates.length));
+
+  const truncate = (text, max = 90) => (text.length > max ? text.slice(0, max) + '…' : text);
+
+  // Side-by-side layout: always show both sections
+
   return (
     <section className="dashboard-section">
       <div className="container">
@@ -79,11 +101,11 @@ const Dashboard = ({ isLoggedIn }) => {
           )}
 
           {isLoggedIn && (
-            <>
+            <div className="dashboard-content">
               <div className="events-section">
                 <h3><i className="fas fa-calendar"></i> Upcoming Events</h3>
                 <div className="events-list">
-                  {events.map((event) => (
+                  {displayEvents.map((event) => (
                     <div key={event.id} className="event-card">
                       <div className="event-date">
                         <span className="day">{event.date}</span>
@@ -91,20 +113,23 @@ const Dashboard = ({ isLoggedIn }) => {
                       </div>
                       <div className="event-info">
                         <h4>{event.title}</h4>
-                        <p>{event.description}</p>
+                        <p>{truncate(event.description)}</p>
                         <span className="event-time">
                           <i className="fas fa-clock"></i> {event.time}
                         </span>
                       </div>
                     </div>
                   ))}
+                  {displayEvents.length === 0 && (
+                    <div className="no-notifications"><p>No events found.</p></div>
+                  )}
                 </div>
               </div>
 
               <div className="updates-section">
                 <h3><i className="fas fa-bullhorn"></i> Latest Updates</h3>
                 <div className="updates-list">
-                  {updates.map((update) => (
+                  {displayUpdates.map((update) => (
                     <div key={update.id} className={`update-item ${update.type}`}>
                       <div className="update-icon">
                         <i className={`fas fa-${
@@ -115,14 +140,17 @@ const Dashboard = ({ isLoggedIn }) => {
                       </div>
                       <div className="update-content">
                         <h4>{update.title}</h4>
-                        <p>{update.description}</p>
+                        <p>{truncate(update.description)}</p>
                         <span className="update-time">{update.time}</span>
                       </div>
                     </div>
                   ))}
+                  {displayUpdates.length === 0 && (
+                    <div className="no-notifications"><p>No updates found.</p></div>
+                  )}
                 </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

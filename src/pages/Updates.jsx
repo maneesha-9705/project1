@@ -2,13 +2,13 @@ import React from 'react';
 import DashboardContent from '../components/Dashboard';
 import Footer from '../components/Footer';
 
-const Events = ({ isLoggedIn }) => {
+const Updates = ({ isLoggedIn }) => {
   return (
     <>
-      <DashboardContent isLoggedIn={isLoggedIn} view="events" />
+      <DashboardContent isLoggedIn={isLoggedIn} view="updates" />
       <Footer />
     </>
   );
 };
 
-export default Events;
+export default Updates;

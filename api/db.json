@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "5000",
+      "name": "manasa",
+      "email": "manasa@gmail.com",
+      "mobile": "7995104089",
+      "collegeId": "34567890",
+      "createdAt": "2025-10-14T10:45:40.497Z"
+    },
+    {
+      "id": "a881",
+      "name": "manasag",
+      "email": "manasa2@gmail.com",
+      "mobile": "7995104089",
+      "collegeId": "34567890",
+      "createdAt": "2025-10-14T16:13:43.585Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "afce",
+      "title": "warning",
+      "message": "1st block under construction so please take care",
+      "type": "info",
+      "time": "just now",
+      "read": false
+    }
+  ],
+  "events": [],
+  "admins": [
+    {
+      "id": "9eee",
+      "username": "admin",
+      "loggedInAt": "2025-10-14T16:05:52.268Z"
+    },
+    {
+      "id": "08ff",
+      "username": "admin",
+      "loggedInAt": "2025-10-14T16:07:42.419Z"
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+const Navbar = ({
+  isLoggedIn,
+  currentUser,
+  logout,
+  notifications = [],
+  showNotifications = false,
+  setShowNotifications = () => {},
+  markAllAsRead = () => {},
+  markNotificationAsRead = () => {},
+  unreadCount = 0
+}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleNotificationClick = () => {
+    if (isLoggedIn) {
+      setShowNotifications(!showNotifications);
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  const handleRegisterClick = () => {
+    navigate('/register');
+  };
+
+  return (
+    <>
+      <nav className="navbar">
+        <div className="nav-container">
+          <div className="nav-logo">
+            <i className="fas fa-graduation-cap"></i>
+            <span>Student Hub</span>
+          </div>
+
+          <ul className="nav-menu">
+            <li>
+              <Link
+                to="/"
+                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+              >
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/about"
+                className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
+              >
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/events"
+                className={`nav-link ${location.pathname === '/events' ? 'active' : ''}`}
+              >
+                Events & Updates
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/discussion"
+                className={`nav-link ${location.pathname === '/discussion' ? 'active' : ''}`}
+              >
+                Discussion
+              </Link>
+            </li>
+          </ul>
+
+          <div className="nav-right">
+            {isLoggedIn ? (
+              <>
+                <div className="user-info">
+                  <span className="user-name">Welcome, {currentUser?.name}!</span>
+                </div>
+
+                <div className="notification-icon" onClick={handleNotificationClick}>
+                  <i className="fas fa-bell"></i>
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount}</span>
+                  )}
+                </div>
+
+                <button className="btn btn-secondary logout-btn" onClick={logout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  className="btn btn-outline"
+                  onClick={handleLoginClick}
+                >
+                  Login
+                </button>
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleRegisterClick}
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {showNotifications && isLoggedIn && (
+        <div className="notifications-dropdown">
+          <div className="notifications-header">
+            <h4>Notifications</h4>
+            <button className="btn btn-link" onClick={markAllAsRead}>
+              Mark all as read
+            </button>
+          </div>
+          <div className="notifications-list">
+            {notifications.length > 0 ? (
+              notifications.map(notification => (
+                <div 
+                  key={notification.id} 
+                  className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                  onClick={() => markNotificationAsRead(notification.id)}
+                >
+                  <div className="notification-icon">
+                    <i className={`fas ${
+                      notification.type === 'event' ? 'fa-calendar-alt' : 
+                      notification.type === 'update' ? 'fa-bullhorn' : 'fa-comments'
+                    }`}></i>
+                  </div>
+                  <div className="notification-content">
+                    <h5>{notification.title}</h5>
+                    <p>{notification.message}</p>
+                    <span className="notification-time">{notification.time}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="no-notifications">
+                <i className="far fa-bell-slash"></i>
+                <p>No new notifications</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Navbar;

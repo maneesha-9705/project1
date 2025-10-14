@@ -1,0 +1,110 @@
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import './App.css';
+import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
+import Home from './pages/Home';
+import About from './pages/About';
+import Events from './pages/Events';
+import Discussion from './pages/Discussion';
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+function AppContent() {
+  const { user, logout } = useAuth();
+  
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "New Event Added",
+      message: "Career Fair 2024 has been scheduled for October 15th",
+      time: "2 minutes ago",
+      type: "event",
+      read: false
+    },
+    {
+      id: 2,
+      title: "Library Hours Extended",
+      message: "The main library will now be open until 11 PM during exam season",
+      time: "1 hour ago",
+      type: "update",
+      read: false
+    },
+    {
+      id: 3,
+      title: "New Discussion",
+      message: "Best study techniques for finals - new discussion started",
+      time: "3 hours ago",
+      type: "discussion",
+      read: false
+    }
+  ]);
+
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleLogout = () => {
+    logout();
+    setShowNotifications(false);
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+    setShowNotifications(false);
+  };
+
+  const markNotificationAsRead = (id) => {
+    setNotifications(notifications.map(n =>
+      n.id === id ? { ...n, read: true } : n
+    ));
+  };
+
+  return (
+    <div className="App">
+      <Navbar
+        isLoggedIn={!!user}
+        currentUser={user}
+        logout={handleLogout}
+        notifications={notifications}
+        showNotifications={showNotifications}
+        setShowNotifications={setShowNotifications}
+        markAllAsRead={markAllAsRead}
+        markNotificationAsRead={markNotificationAsRead}
+        unreadCount={unreadCount}
+      />
+
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+        
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        
+        <Route path="/events" element={
+          <ProtectedRoute isLoggedIn={!!user}>
+            <Events />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/discussion" element={
+          <ProtectedRoute isLoggedIn={!!user}>
+            <Discussion />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;

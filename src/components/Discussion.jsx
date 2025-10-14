@@ -37,12 +37,37 @@ const Discussion = ({ isLoggedIn }) => {
     content: ''
   });
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('recent'); // 'recent' | 'replies'
+
   const categories = [
     { value: 'academic', label: 'Academic' },
     { value: 'career', label: 'Career' },
     { value: 'events', label: 'Events' },
     { value: 'general', label: 'General' }
   ];
+
+  const normalizedIncludes = (text, q) =>
+    text.toLowerCase().includes(q.trim().toLowerCase());
+
+  const filteredSortedDiscussions = discussions
+    .filter((d) =>
+      (filterCategory === 'all' || d.category === filterCategory) &&
+      (
+        searchQuery.trim() === '' ||
+        normalizedIncludes(d.title, searchQuery) ||
+        normalizedIncludes(d.content, searchQuery) ||
+        normalizedIncludes(d.author, searchQuery)
+      )
+    )
+    .sort((a, b) => {
+      if (sortBy === 'replies') {
+        return b.replies - a.replies;
+      }
+      // Fallback to recent: assume earlier items are older; keep current order (newest first in state)
+      return 0;
+    });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -158,26 +183,65 @@ const Discussion = ({ isLoggedIn }) => {
                 <p>Login to view and participate in discussions</p>
               </div>
             ) : (
-              <div className="topics-list">
-                {discussions.map((discussion) => (
-                  <div key={discussion.id} className="topic-card">
-                    <div className="topic-header">
-                      <h4>{discussion.title}</h4>
-                      <span className={`topic-category ${discussion.category}`}>
-                        {discussion.category.charAt(0).toUpperCase() + discussion.category.slice(1)}
-                      </span>
-                    </div>
-                    <div className="topic-content">
-                      <p>{discussion.content}</p>
-                    </div>
-                    <div className="topic-meta">
-                      <span className="author">{discussion.author}</span>
-                      <span className="replies">{discussion.replies} replies</span>
-                      <span className="time">{discussion.time}</span>
-                    </div>
+              <>
+                <div className="section-controls" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  <div className="form-group" style={{ minWidth: '180px', marginBottom: 0 }}>
+                    <select
+                      className="form-control"
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                    >
+                      <option value="all">All Categories</option>
+                      {categories.map((cat) => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                      ))}
+                    </select>
                   </div>
-                ))}
-              </div>
+                  <div className="form-group" style={{ flex: '1 1 240px', marginBottom: 0 }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search discussions..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group" style={{ minWidth: '180px', marginBottom: 0 }}>
+                    <select
+                      className="form-control"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                    >
+                      <option value="recent">Sort: Most Recent</option>
+                      <option value="replies">Sort: Most Replies</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="topics-list">
+                  {filteredSortedDiscussions.map((discussion) => (
+                    <div key={discussion.id} className="topic-card">
+                      <div className="topic-header">
+                        <h4>{discussion.title}</h4>
+                        <span className={`topic-category ${discussion.category}`}>
+                          {discussion.category.charAt(0).toUpperCase() + discussion.category.slice(1)}
+                        </span>
+                      </div>
+                      <div className="topic-content">
+                        <p>{discussion.content}</p>
+                      </div>
+                      <div className="topic-meta">
+                        <span className="author">{discussion.author}</span>
+                        <span className="replies">{discussion.replies} replies</span>
+                        <span className="time">{discussion.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {filteredSortedDiscussions.length === 0 && (
+                    <div className="no-notifications"><p>No discussions match your filters.</p></div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
