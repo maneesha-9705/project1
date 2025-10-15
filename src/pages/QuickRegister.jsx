@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const QuickRegister = ({ onSuccess }) => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', mobile: '', collegeId: '' });
+  const location = useLocation();
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const reason = params.get('reason');
+  const [form, setForm] = useState({ name: '', email: '', mobile: '', collegeId: '', password: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -18,6 +21,10 @@ const QuickRegister = ({ onSuccess }) => {
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = 'Valid email required';
     if (!form.mobile.trim() || !/^\d{10}$/.test(form.mobile)) newErrors.mobile = 'Enter 10-digit mobile number';
     if (!form.collegeId.trim()) newErrors.collegeId = 'College ID is required';
+    if (!form.password.trim()) newErrors.password = 'Password is required';
+    if (form.password && form.password.length < 6) newErrors.password = 'At least 6 characters';
+    if (!form.confirmPassword.trim()) newErrors.confirmPassword = 'Confirm your password';
+    if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -41,6 +48,7 @@ const QuickRegister = ({ onSuccess }) => {
           email: form.email,
           mobile: form.mobile,
           collegeId: form.collegeId,
+          password: form.password,
           createdAt: new Date().toISOString()
         })
       });
@@ -82,6 +90,11 @@ const QuickRegister = ({ onSuccess }) => {
         <div className="container">
           <div className="register-card">
             <div className="register-left">
+              {reason === 'not_found' && (
+                <div className="error-text" style={{ background: '#fff3cd', border: '1px solid #ffeaa7', color: '#856404', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                  We couldn't find an account with that email. Please register to continue.
+                </div>
+              )}
               <h2>Create your account</h2>
               <p className="muted">It only takes a minute. We’ll never share your details.</p>
 
@@ -138,6 +151,33 @@ const QuickRegister = ({ onSuccess }) => {
                     className="form-control"
                   />
                   {errors.collegeId && <small className="error-text">{errors.collegeId}</small>}
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Create a password"
+                      value={form.password}
+                      onChange={handleChange}
+                      className="form-control"
+                    />
+                    {errors.password && <small className="error-text">{errors.password}</small>}
+                  </div>
+                  <div className="form-group">
+                    <label>Confirm Password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm password"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      className="form-control"
+                    />
+                    {errors.confirmPassword && <small className="error-text">{errors.confirmPassword}</small>}
+                  </div>
                 </div>
 
                 <button type="submit" className="btn btn-primary register-btn">

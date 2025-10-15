@@ -5,9 +5,11 @@ const API = 'http://localhost:3000';
 
 const AdminNotifications = () => {
   const [items, setItems] = useState([]);
-  const [form, setForm] = useState({ title: '', message: '', type: 'info' });
+  const [form, setForm] = useState({ title: '', message: '', type: 'info', date: '', time: '' });
+  const [target, setTarget] = useState('notifications'); // notifications | updates | events
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [query, setQuery] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', message: '', type: 'info' });
@@ -39,15 +41,66 @@ const AdminNotifications = () => {
       setError('Title and Message are required');
       return;
     }
+    if (target === 'events') {
+      if (!form.date || !form.time) {
+        setError('Date and Time are required for events');
+        return;
+      }
+    }
     try {
-      const res = await fetch(`${API}/notifications`, {
+      // duplicate check per target
+      if (target === 'events') {
+        const existingRes = await fetch(`${API}/events`);
+        const existing = existingRes.ok ? await existingRes.json() : [];
+        const key = (s) => (s || '').trim().toLowerCase();
+        const isDupEv = Array.isArray(existing) && existing.some(ev =>
+          key(ev.title) === key(form.title) &&
+          key(ev.description) === key(form.message) &&
+          key(ev.date) === key(form.date)
+        );
+        if (isDupEv) {
+          setError('Duplicate event detected (same title, description, and date).');
+          return;
+        }
+      } else {
+        const dupRes = await fetch(`${API}/${target}`);
+        const dupList = (dupRes.ok ? await dupRes.json() : []).map((x) => ({
+          title: (x.title || '').trim().toLowerCase(),
+          text: ((x.message || x.description || '')).trim().toLowerCase()
+        }));
+        const newTitle = form.title.trim().toLowerCase();
+        const newText = form.message.trim().toLowerCase();
+        const isDup = dupList.some((d) => d.title === newTitle && d.text === newText);
+        if (isDup) {
+          setError('Duplicate detected in the selected section. Please modify the content.');
+          return;
+        }
+      }
+
+      const endpoint = target === 'events' ? `${API}/events` : `${API}/${target}`;
+      const payload = target === 'updates'
+        ? { title: form.title, description: form.message, type: form.type, time: 'today' }
+        : target === 'events'
+          ? { title: form.title, description: form.message, date: form.date, time: form.time }
+          : { title: form.title, message: form.message, type: form.type, time: 'just now', read: false };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, time: 'just now', read: false })
+        body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error('create failed');
-      setForm({ title: '', message: '', type: 'info' });
-      load();
+      setForm({ title: '', message: '', type: 'info', date: '', time: '' });
+      // If we added to notifications, refresh list; updates are not shown here but still created
+      if (target === 'notifications') {
+        load();
+      }
+      // broadcast data change for user UI to refresh immediately
+      try { window.dispatchEvent(new Event('data-change')); } catch {}
+      // show success popup and auto-dismiss
+      const label = target === 'events' ? 'Event' : (target === 'updates' ? 'Update' : 'Notification');
+      setSuccess(`${label} added successfully`);
+      setTimeout(() => setSuccess(''), 2500);
     } catch {
       setError('Failed to create notification');
     }
@@ -106,8 +159,21 @@ const AdminNotifications = () => {
             <h2>Admin • Notifications</h2>
             <p className="muted">Create announcements for users. This does not disturb the user UI.</p>
             {error && <div className="error-text" style={{ marginBottom: '0.75rem' }}>{error}</div>}
+            {success && (
+              <div className="success-text" style={{ marginBottom: '0.75rem', background: '#d1fae5', border: '1px solid #34d399', color: '#065f46', padding: '0.6rem 0.75rem', borderRadius: 8 }}>
+                {success}
+              </div>
+            )}
 
             <form onSubmit={addItem} style={{ display: 'grid', gap: '0.75rem' }}>
+              <div className="form-group">
+                <label>Section</label>
+                <select className="form-control" value={target} onChange={(e)=>setTarget(e.target.value)}>
+                  <option value="notifications">Notifications (popup)</option>
+                  <option value="updates">Updates (Events & Updates page)</option>
+                  <option value="events">Events (Events & Updates page)</option>
+                </select>
+              </div>
               <div className="form-group">
                 <label>Title</label>
                 <input className="form-control" name="title" value={form.title} onChange={handleChange} />
@@ -116,14 +182,29 @@ const AdminNotifications = () => {
                 <label>Message</label>
                 <textarea className="form-control" name="message" value={form.message} onChange={handleChange} />
               </div>
-              <div className="form-group">
-                <label>Type</label>
-                <select className="form-control" name="type" value={form.type} onChange={handleChange}>
-                  <option value="info">info</option>
-                  <option value="warning">warning</option>
-                  <option value="success">success</option>
-                </select>
-              </div>
+              {target !== 'events' && (
+                <div className="form-group">
+                  <label>Type</label>
+                  <select className="form-control" name="type" value={form.type} onChange={handleChange}>
+                    <option value="info">info</option>
+                    <option value="warning">warning</option>
+                    <option value="success">success</option>
+                  </select>
+                </div>
+              )}
+
+              {target === 'events' && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Date</label>
+                    <input className="form-control" type="date" name="date" value={form.date} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Time</label>
+                    <input className="form-control" type="time" name="time" value={form.time} onChange={handleChange} />
+                  </div>
+                </div>
+              )}
               <button className="btn btn-primary" type="submit">Add Notification</button>
             </form>
           </div>

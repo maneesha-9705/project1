@@ -9,6 +9,7 @@ const AdminEvents = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
+  const [success, setSuccess] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', date: '', time: '' });
 
@@ -40,6 +41,20 @@ const AdminEvents = () => {
       return;
     }
     try {
+      // duplicate check
+      const existingRes = await fetch(`${API}/events`);
+      const existing = existingRes.ok ? await existingRes.json() : [];
+      const key = (s) => (s || '').trim().toLowerCase();
+      const isDup = Array.isArray(existing) && existing.some(ev =>
+        key(ev.title) === key(form.title) &&
+        key(ev.description) === key(form.description) &&
+        key(ev.date) === key(form.date)
+      );
+      if (isDup) {
+        setError('Duplicate event detected (same title, description, and date).');
+        return;
+      }
+
       const res = await fetch(`${API}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,6 +63,9 @@ const AdminEvents = () => {
       if (!res.ok) throw new Error('create failed');
       setForm({ title: '', description: '', date: '', time: '' });
       load();
+      setSuccess('Event added successfully');
+      setTimeout(() => setSuccess(''), 2500);
+      try { window.dispatchEvent(new Event('data-change')); } catch {}
     } catch {
       setError('Failed to create event');
     }
@@ -106,6 +124,11 @@ const AdminEvents = () => {
             <h2>Admin • Events</h2>
             <p className="muted">Create and manage events visible to students.</p>
             {error && <div className="error-text" style={{ marginBottom: '0.75rem' }}>{error}</div>}
+            {success && (
+              <div className="success-text" style={{ marginBottom: '0.75rem', background: '#d1fae5', border: '1px solid #34d399', color: '#065f46', padding: '0.6rem 0.75rem', borderRadius: 8 }}>
+                {success}
+              </div>
+            )}
 
             <form onSubmit={addItem} style={{ display: 'grid', gap: '0.75rem' }}>
               <div className="form-group">

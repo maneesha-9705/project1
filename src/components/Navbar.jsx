@@ -6,7 +6,6 @@ const Navbar = ({
   isLoggedIn,
   currentUser,
   login,
-  register,
   logout,
   notifications,
   showNotifications,
@@ -18,7 +17,7 @@ const Navbar = ({
 }) => {
   const location = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  // login-only modal
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleNotificationClick = () => {
@@ -27,8 +26,7 @@ const Navbar = ({
     }
   };
 
-  const handleAuthClick = (mode) => {
-    setAuthMode(mode);
+  const handleAuthClick = () => {
     setShowAuthModal(true);
     setIsMenuOpen(false);
     setShowNotifications(false);
@@ -121,16 +119,17 @@ const Navbar = ({
                 {/* Login/Register Buttons - Only for non-authenticated users */}
                 <button
                   className="btn btn-primary"
-                  onClick={() => handleAuthClick('login')}
+                  onClick={handleAuthClick}
                 >
                   Login
                 </button>
-                <button
+                <Link
+                  to="/register"
                   className="btn btn-secondary"
-                  onClick={() => handleAuthClick('register')}
+                  onClick={closeMenu}
                 >
                   Register
-                </button>
+                </Link>
               </>
             )}
 
@@ -206,9 +205,6 @@ const Navbar = ({
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onLogin={login}
-        onRegister={register}
-        mode={authMode}
-        setMode={setAuthMode}
       />
     </>
   );

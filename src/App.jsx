@@ -18,32 +18,8 @@ function App() {
   const [registered, setRegistered] = useState(false);
   const [currentUser, setCurrentUser] = useState({ email: 'user@example.com', name: 'User' });
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New Event Added",
-      message: "Career Fair 2024 has been scheduled for October 15th",
-      time: "2 minutes ago",
-      type: "event",
-      read: false
-    },
-    {
-      id: 2,
-      title: "Library Hours Extended",
-      message: "The main library will now be open until 11 PM during exam season",
-      time: "1 hour ago",
-      type: "update",
-      read: false
-    },
-    {
-      id: 3,
-      title: "New Discussion",
-      message: "Best study techniques for finals - new discussion started",
-      time: "3 hours ago",
-      type: "discussion",
-      read: false
-    }
-  ]);
+  const API = 'http://localhost:3000';
+  const [notifications, setNotifications] = useState([]);
 
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -55,12 +31,30 @@ function App() {
     return () => window.removeEventListener('registered-change', handler);
   }, []);
 
+  // Load notifications from server and periodically refresh, plus react to admin changes
+  useEffect(() => {
+    let canceled = false;
+    const load = async () => {
+      try {
+        const res = await fetch(`${API}/notifications`);
+        if (!res.ok) throw new Error('load failed');
+        const data = await res.json();
+        if (!canceled) setNotifications(data || []);
+      } catch (_) {
+        // keep existing state on error
+      }
+    };
+    const onChange = () => load();
+    window.addEventListener('data-change', onChange);
+    load();
+    const id = setInterval(load, 15000);
+    return () => { canceled = true; clearInterval(id); window.removeEventListener('data-change', onChange); };
+  }, []);
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Authentication functions
+  // Authentication functions (do not auto-register on login)
   const login = () => true;
-
-  const register = (data) => true;
 
   const logout = () => {
     localStorage.removeItem('registered');
@@ -91,7 +85,7 @@ function App() {
           isLoggedIn={registered}
           currentUser={currentUser}
           login={login}
-          register={register}
+          register={() => true}
           logout={logout}
           notifications={notifications}
           showNotifications={showNotifications}
@@ -103,7 +97,7 @@ function App() {
         />
 
         <Routes>
-          <Route path="/register" element={<QuickRegister onSuccess={() => { localStorage.setItem('registered', 'true'); setRegistered(true); }} />} />
+          <Route path="/register" element={<QuickRegister onSuccess={() => { localStorage.setItem('registered', 'true'); setRegistered(true); window.dispatchEvent(new Event('registered-change')); }} />} />
           <Route path="/" element={
             <ProtectedRoute isLoggedIn={registered}>
               <Home />

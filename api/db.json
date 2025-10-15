@@ -15,19 +15,96 @@
       "mobile": "7995104089",
       "collegeId": "34567890",
       "createdAt": "2025-10-14T16:13:43.585Z"
+    },
+    {
+      "id": "8558",
+      "name": "harshini",
+      "email": "harshini@gmail.com",
+      "mobile": "1234567890",
+      "collegeId": "wertyui",
+      "createdAt": "2025-10-15T12:01:43.911Z"
+    },
+    {
+      "id": "258b",
+      "name": "harshini",
+      "email": "harshinim@gmail.com",
+      "mobile": "1234567890",
+      "collegeId": "wertyui",
+      "password": "123456",
+      "createdAt": "2025-10-15T12:15:21.484Z"
+    }
+  ],
+  "updates": [
+    {
+      "id": "u301",
+      "title": "Library Hours Extended",
+      "description": "The main library will now be open until 11 PM during exam season.",
+      "type": "info",
+      "time": "today"
+    },
+    {
+      "id": "u302",
+      "title": "New Scholarship Available",
+      "description": "Applications are open for the Excellence in STEM Scholarship 2025.",
+      "type": "success",
+      "time": "yesterday"
+    },
+    {
+      "id": "39e9",
+      "title": "registration information",
+      "description": "Deadline for courses registration ,drop/add periods about course availability",
+      "type": "info",
+      "time": "today"
+    },
+    {
+      "id": "ac50",
+      "title": "Cultural & Events",
+      "description": "The Annual Cultural Fest “Utsav 2025” is scheduled for next month, featuring inter-college dance, drama, and music competitions.\n\nThe Photography Club launched a “Campus Through My Lens” contest with prizes for creative captures of college life.",
+      "type": "info",
+      "time": "today"
     }
   ],
   "notifications": [
     {
-      "id": "afce",
-      "title": "warning",
-      "message": "1st block under construction so please take care",
+      "id": "6ead",
+      "title": "lnternal Exam Schedule",
+      "message": "The Mid-Semester Examinations will be conducted from 4th to 9th November 2025. The detailed timetable will be displayed on the department notice board.",
+      "type": "info",
+      "time": "just now",
+      "read": false
+    },
+    {
+      "id": "5d9f",
+      "title": "Fee Payment Reminder",
+      "message": "Students are reminded to clear their semester fees by 30th October 2025 to avoid late payment charges.",
       "type": "info",
       "time": "just now",
       "read": false
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "id": "e201",
+      "title": "Career Fair 2025",
+      "description": "Meet top companies and explore internships and jobs.",
+      "date": "2025-11-05",
+      "time": "10:00"
+    },
+    {
+      "id": "e202",
+      "title": "Tech Workshop: React",
+      "description": "Hands-on session on building modern UIs with React.",
+      "date": "2025-11-12",
+      "time": "14:00"
+    },
+    {
+      "id": "a817",
+      "title": "Technical Event Announcement",
+      "description": "ech Symposium “INNOVATE 2025”\nThe Department of Computer Science presents a National-Level Technical Symposium for tech enthusiasts!\n\n",
+      "date": "2025-10-28",
+      "time": "04:59"
+    }
+  ],
   "admins": [
     {
       "id": "9eee",
@@ -38,6 +115,51 @@
       "id": "08ff",
       "username": "admin",
       "loggedInAt": "2025-10-14T16:07:42.419Z"
+    },
+    {
+      "id": "1872",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T12:09:53.758Z"
+    },
+    {
+      "id": "bd95",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T12:16:25.291Z"
+    },
+    {
+      "id": "1818",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T12:26:51.423Z"
+    },
+    {
+      "id": "29aa",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T12:40:50.573Z"
+    },
+    {
+      "id": "f3d4",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T12:53:07.804Z"
+    },
+    {
+      "id": "b999",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T12:55:15.205Z"
+    },
+    {
+      "id": "0e08",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T13:06:10.962Z"
+    },
+    {
+      "id": "6727",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T13:10:11.050Z"
+    },
+    {
+      "id": "6f61",
+      "username": "admin",
+      "loggedInAt": "2025-10-15T13:16:11.157Z"
     }
   ]
 }

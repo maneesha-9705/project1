@@ -1,62 +1,40 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const Dashboard = ({ isLoggedIn, view }) => {
-  const events = [
-    {
-      id: 1,
-      title: "Career Fair 2024",
-      description: "Meet with top companies and explore job opportunities",
-      date: "15",
-      month: "OCT",
-      time: "10:00 AM - 4:00 PM"
-    },
-    {
-      id: 2,
-      title: "Tech Workshop",
-      description: "Learn about the latest technologies in web development",
-      date: "20",
-      month: "OCT",
-      time: "2:00 PM - 5:00 PM"
-    },
-    {
-      id: 3,
-      title: "Study Group Session",
-      description: "Mathematics preparation for upcoming exams",
-      date: "25",
-      month: "OCT",
-      time: "6:00 PM - 8:00 PM"
-    }
-  ];
+  const API = 'http://localhost:3000';
+  const [events, setEvents] = useState([]);
+  const [updates, setUpdates] = useState([]);
 
-  const updates = [
-    {
-      id: 1,
-      title: "Library Hours Extended",
-      description: "The main library will now be open until 11 PM during exam season.",
-      time: "2 hours ago",
-      type: "info"
-    },
-    {
-      id: 2,
-      title: "Campus Maintenance Notice",
-      description: "Building A will be under maintenance this weekend. Please use alternative routes.",
-      time: "4 hours ago",
-      type: "warning"
-    },
-    {
-      id: 3,
-      title: "New Scholarship Available",
-      description: "Applications are now open for the Excellence in STEM Scholarship 2024.",
-      time: "1 day ago",
-      type: "success"
-    }
-  ];
-
-  const [activeTab, setActiveTab] = useState('events');
   const [query, setQuery] = useState('');
 
+  useEffect(() => {
+    let canceled = false;
+    const load = async () => {
+      try {
+        const [evRes, updRes] = await Promise.all([
+          fetch(`${API}/events`),
+          fetch(`${API}/updates`)
+        ]);
+        const [evData, updData] = await Promise.all([
+          evRes.ok ? evRes.json() : [],
+          updRes.ok ? updRes.json() : []
+        ]);
+        if (!canceled) {
+          setEvents(Array.isArray(evData) ? evData : []);
+          setUpdates(Array.isArray(updData) ? updData : []);
+        }
+      } catch (_) {
+      }
+    };
+    const onChange = () => load();
+    window.addEventListener('data-change', onChange);
+    load();
+    const id = setInterval(load, 15000);
+    return () => { canceled = true; clearInterval(id); window.removeEventListener('data-change', onChange); };
+  }, []);
+
   const matchesQuery = (text) =>
-    text.toLowerCase().includes(query.trim().toLowerCase());
+    String(text || '').toLowerCase().includes(query.trim().toLowerCase());
 
   const filteredEvents = events.filter(
     (e) => matchesQuery(e.title) || matchesQuery(e.description)
@@ -66,11 +44,27 @@ const Dashboard = ({ isLoggedIn, view }) => {
     (u) => matchesQuery(u.title) || matchesQuery(u.description)
   );
 
-  const half = (n) => Math.ceil(n / 2);
-  const displayEvents = filteredEvents.slice(0, half(filteredEvents.length));
-  const displayUpdates = filteredUpdates.slice(0, half(filteredUpdates.length));
+  const displayEvents = filteredEvents;
+  const displayUpdates = filteredUpdates;
 
   const truncate = (text, max = 90) => (text.length > max ? text.slice(0, max) + '…' : text);
+
+  const parseDay = (d) => {
+    if (!d) return '';
+    try {
+      const dt = new Date(d);
+      if (!isNaN(dt)) return String(dt.getDate()).padStart(2, '0');
+    } catch {}
+    return '';
+  };
+  const parseMonth = (d) => {
+    if (!d) return '';
+    try {
+      const dt = new Date(d);
+      if (!isNaN(dt)) return dt.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    } catch {}
+    return '';
+  };
 
   // Side-by-side layout: always show both sections
 
@@ -81,6 +75,21 @@ const Dashboard = ({ isLoggedIn, view }) => {
           <h2>Events & Updates</h2>
           <p>Stay updated with latest events and announcements</p>
         </div>
+
+        {isLoggedIn && (
+          <div className="dashboard-controls">
+            <div className="search-control">
+              <i className="fas fa-search"></i>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search events and updates"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="dashboard-content">
           {!isLoggedIn && (
@@ -108,14 +117,14 @@ const Dashboard = ({ isLoggedIn, view }) => {
                   {displayEvents.map((event) => (
                     <div key={event.id} className="event-card">
                       <div className="event-date">
-                        <span className="day">{event.date}</span>
-                        <span className="month">{event.month}</span>
+                        <span className="day">{event.date ? parseDay(event.date) : ''}</span>
+                        <span className="month">{event.date ? parseMonth(event.date) : ''}</span>
                       </div>
                       <div className="event-info">
                         <h4>{event.title}</h4>
-                        <p>{truncate(event.description)}</p>
+                        <p>{truncate(event.description || '')}</p>
                         <span className="event-time">
-                          <i className="fas fa-clock"></i> {event.time}
+                          <i className="fas fa-clock"></i> {event.date || ''} {event.time || ''}
                         </span>
                       </div>
                     </div>
@@ -140,7 +149,7 @@ const Dashboard = ({ isLoggedIn, view }) => {
                       </div>
                       <div className="update-content">
                         <h4>{update.title}</h4>
-                        <p>{truncate(update.description)}</p>
+                        <p>{truncate(update.description || '')}</p>
                         <span className="update-time">{update.time}</span>
                       </div>
                     </div>

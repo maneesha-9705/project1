@@ -18,13 +18,13 @@
   padding: 0; /* edge-to-edge */
 }
 
-.section-header {
-  padding: 2rem 20px; /* breathing space without constraining width */
+.dashboard-section .section-header {
+  padding: 5rem 0 0 0; /* extra top space to clear fixed navbar */
   margin-bottom: 0; /* remove large gap to allow content to fill height */
 }
 
 .dashboard-content {
-  padding: 1rem 20px 2rem 20px;
+  padding: 1rem 0 2rem 0; /* full-bleed horizontally */
   min-height: calc(100vh - 80px - 80px); /* navbar + header approx */
   align-items: stretch; /* make columns equal height */
 }
@@ -43,10 +43,10 @@
 @media (max-width: 768px) {
   .dashboard-content {
     min-height: auto; /* allow natural stacking on small screens */
-    padding: 1rem 15px 2rem 15px;
+    padding: 1rem 0 2rem 0; /* still edge-to-edge on mobile */
   }
-  .section-header {
-    padding: 1.5rem 15px 1rem 15px;
+  .dashboard-section .section-header {
+    padding: 4rem 0 1rem 0; /* extra top space on mobile as well */
   }
 }
 
@@ -446,7 +446,7 @@ main {
 
 /* Dashboard Section */
 .dashboard-section {
-  padding: 6rem 0;
+  padding: 0; /* full-bleed content within its own container */
   background: #f8f9fa;
 }
 
@@ -468,8 +468,43 @@ main {
 
 .dashboard-content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr; /* stack sections full-width */
   gap: 2.5rem;
+}
+
+/* Dashboard Controls */
+.dashboard-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 1.25rem 0;
+}
+
+.search-control {
+  position: relative;
+  width: min(420px, 100%);
+}
+
+.search-control i {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #9aa4b2;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem 0.75rem 2.2rem;
+  border: 1.5px solid #e4e9f2;
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.08);
 }
 
 .events-section h3,
@@ -492,10 +527,11 @@ main {
 .event-card,
 .update-item {
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+  width: 100%; /* make each card span full width for rectangular layout */
 }
 
 .event-card:hover,
@@ -507,11 +543,17 @@ main {
 .event-card {
   display: flex;
   gap: 1rem;
+  border: 1px solid #eef2ff;
+  background: linear-gradient(180deg, #ffffff, #fbfcff);
 }
 
 .event-date {
   text-align: center;
   min-width: 60px;
+  background: #f4f7ff;
+  border: 1px solid #e6edff;
+  border-radius: 10px;
+  padding: 0.5rem 0.4rem;
 }
 
 .event-date .day {
@@ -548,6 +590,9 @@ main {
 .update-item {
   display: flex;
   gap: 1rem;
+  border: 1px solid #eef2ff;
+  background: linear-gradient(180deg, #ffffff, #fbfcff);
+  position: relative;
 }
 
 .update-icon {
@@ -556,6 +601,37 @@ main {
   min-width: 40px;
   text-align: center;
 }
+
+/* Updates timeline styling */
+.updates-list {
+  position: relative;
+  padding-left: 16px;
+}
+
+.updates-list::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2px;
+  background: linear-gradient(180deg, #e9efff, #eaeef7);
+}
+
+.update-item::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 22px;
+  width: 10px;
+  height: 10px;
+  background: #007bff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.update-item.warning::before { background: #ffc107; box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2); }
+.update-item.success::before { background: #28a745; box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2); }
 
 .update-content h4 {
   margin-bottom: 0.6rem;
@@ -1050,6 +1126,18 @@ main {
   padding-top: 2rem;
   border-top: 1px solid #495057;
   color: #adb5bd;
+}
+
+/* Admin/About page button visibility fixes */
+.about-section .btn.btn-secondary {
+  background: transparent;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+.about-section .btn.btn-secondary:hover {
+  background: #007bff;
+  color: #ffffff;
 }
 
 /* Authentication Modal */

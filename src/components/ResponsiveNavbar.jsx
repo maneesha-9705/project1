@@ -7,7 +7,6 @@ const ResponsiveNavbar = ({
   isLoggedIn,
   currentUser,
   login,
-  register,
   logout,
   notifications = [],
   showNotifications,
@@ -18,7 +17,7 @@ const ResponsiveNavbar = ({
 }) => {
   const location = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  // login-only modal
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -40,8 +39,7 @@ const ResponsiveNavbar = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
 
-  const handleAuthClick = (mode) => {
-    setAuthMode(mode);
+  const handleAuthClick = () => {
     setShowAuthModal(true);
     setShowNotifications(false);
   };
@@ -191,17 +189,17 @@ const ResponsiveNavbar = ({
               ) : (
                 <div className="hidden md:flex space-x-3">
                   <button
-                    onClick={() => handleAuthClick('login')}
+                    onClick={handleAuthClick}
                     className="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
                   >
                     Login
                   </button>
-                  <button
-                    onClick={() => handleAuthClick('register')}
+                  <Link
+                    to="/register"
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                   >
                     Sign Up
-                  </button>
+                  </Link>
                 </div>
               )}
 
@@ -258,21 +256,21 @@ const ResponsiveNavbar = ({
                 </button>
               </>
             ) : (
-              <>
+              <> 
                 <button
-                  onClick={() => handleAuthClick('login')}
+                  onClick={handleAuthClick}
                   className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-md"
                 >
                   <i className="fas fa-sign-in-alt w-6 text-center mr-3"></i>
                   Login
                 </button>
-                <button
-                  onClick={() => handleAuthClick('register')}
+                <Link
+                  to="/register"
                   className="w-full flex items-center px-4 py-3 text-left text-blue-600 hover:bg-blue-50 rounded-md"
                 >
                   <i className="fas fa-user-plus w-6 text-center mr-3"></i>
                   Create Account
-                </button>
+                </Link>
               </>
             )}
           </div>
@@ -334,12 +332,9 @@ const ResponsiveNavbar = ({
 
       {/* Auth Modal */}
       <AuthModal 
-        show={showAuthModal} 
+        isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
-        mode={authMode}
-        onSwitchMode={(mode) => setAuthMode(mode)}
         onLogin={login}
-        onRegister={register}
       />
     </>
   );
